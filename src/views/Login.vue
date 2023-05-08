@@ -1,54 +1,33 @@
 <template>
   <div class="col-md-12">
     <div class="card card-container">
-      <img
-        id="profile-img"
-        src="//ssl.gstatic.com/accounts/ui/avatar_2x.png"
-        class="profile-img-card"
-      />
+      <img id="profile-img" src="//ssl.gstatic.com/accounts/ui/avatar_2x.png" class="profile-img-card" />
       <form name="form" @submit.prevent="handleLogin">
         <div class="form-group">
           <label for="email">Email</label>
-          <input
-            v-model.trim="email"
-            :class="{invalid: ($v.email.$dirty && !$v.email.required) || ($v.email.$dirty && !$v.email.email)}"
-            type="text"
-            class="form-control"
-            id="email"
-          />
-        <small 
-          class="helper-text invalid"
-          v-if="$v.email.$dirty && !$v.email.required"
-        >Поле Email не должно быть пустым</small>
-        <small 
-          class="helper-text invalid"
-          v-else-if="$v.email.$dirty && !$v.email.email"
-        >Введите корретный Email</small>
+          <input v-model.trim="email"
+            :class="{ invalid: ($v.email.$dirty && !$v.email.required) || ($v.email.$dirty && !$v.email.email) }"
+            type="text" class="form-control" id="email" />
+          <small class="helper-text invalid" v-if="$v.email.$dirty && !$v.email.required">Поле Email не должно быть
+            пустым</small>
+          <small class="helper-text invalid" v-else-if="$v.email.$dirty && !$v.email.email">Введите корретный
+            Email</small>
         </div>
         <div class="form-group">
           <label for="password">Пароль</label>
-          <input
-            v-model.trim="password"
-            :class="{invalid: 
-              ($v.password.$dirty && !$v.password.required) 
+          <input v-model.trim="password" :class="{
+            invalid:
+              ($v.password.$dirty && !$v.password.required)
               || ($v.password.$dirty && !$v.password.minLength || !$v.password.maxLength)
-              }"
-            type="password"
-            class="form-control"
-            id="password"
-          />
-          <small 
-          class="helper-text invalid"
-          v-if="$v.password.$dirty && !$v.password.required"
-        >
-          Введите пароль
-        </small>
-        <small 
-          class="helper-text invalid"
-          v-else-if="$v.password.$dirty && !$v.password.minLength || !$v.password.maxLength"
-        >
-          Пароль должен быть в пределах от {{$v.password.$params.minLength.min}} до {{$v.password.$params.maxLength.max}} символов. Сейчас он {{password.length}}
-        </small>
+          }" type="password" class="form-control" id="password" />
+          <small class="helper-text invalid" v-if="$v.password.$dirty && !$v.password.required">
+            Введите пароль
+          </small>
+          <small class="helper-text invalid"
+            v-else-if="$v.password.$dirty && !$v.password.minLength || !$v.password.maxLength">
+            Пароль должен быть в пределах от {{ $v.password.$params.minLength.min }} до
+            {{ $v.password.$params.maxLength.max }} символов. Сейчас он {{ password.length }}
+          </small>
         </div>
         <div class="form-group">
           <button class="btn btn-primary btn-block" :disabled="loading" type="submit">
@@ -65,7 +44,7 @@
 </template>
 
 <script>
-import {email, required, minLength, maxLength} from 'vuelidate/lib/validators'
+import { email, required, minLength, maxLength } from 'vuelidate/lib/validators'
 
 export default {
   name: 'Login',
@@ -78,8 +57,8 @@ export default {
     };
   },
   validations: {
-    email: {email, required},
-    password: {required, minLength: minLength(8), maxLength: maxLength(20)}
+    email: { email, required },
+    password: { required, minLength: minLength(8), maxLength: maxLength(20) }
   },
   computed: {
     loggedIn() {
@@ -107,9 +86,9 @@ export default {
       if (this.email && this.password) {
         this.$store.dispatch('auth/login', user).then(
           () => {
-             this.$router.push('/profile');
+            this.$router.push('/profile');
           },
-           error => {
+          error => {
             this.loading = false;
             this.message =
               (error.response && error.response.data && error.response.data.message) ||

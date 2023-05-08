@@ -6,7 +6,7 @@ const setup = (store) => {
     (config) => {
       const token = TokenService.getLocalAccessToken();
       if (token) {
-        config.headers["Authorization"] = 'Bearer ' + token;  // for Spring Boot back-end
+        config.headers["Authorization"] = "Bearer " + token; // for Spring Boot back-end
       }
       return config;
     },
@@ -28,12 +28,14 @@ const setup = (store) => {
           originalConfig._retry = true;
 
           try {
-            TokenService.updateLocalAccessToken(TokenService.getLocalRefreshToken());
+            TokenService.updateLocalAccessToken(
+              TokenService.getLocalRefreshToken()
+            );
             const rs = await axiosInstance.post("/auth/token");
 
             const { accessToken } = rs.data;
 
-            store.dispatch('auth/token', accessToken);
+            store.dispatch("auth/token", accessToken);
             TokenService.updateLocalAccessToken(accessToken);
 
             return axiosInstance(originalConfig);
@@ -52,7 +54,6 @@ const setup = (store) => {
             //     TokenService.removeUser();
             //     }
             // })
-            
           } catch (_error) {
             return Promise.reject(_error);
           }
