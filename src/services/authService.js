@@ -20,7 +20,6 @@ class AuthService {
   }
 
   logout() {
-    TokenService.removeUser();
     return api
       .post("/signout", {
         headers: {

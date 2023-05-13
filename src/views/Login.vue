@@ -1,30 +1,29 @@
 <template>
   <div class="col-md-12">
     <div class="card card-container">
-      <img id="profile-img" src="//ssl.gstatic.com/accounts/ui/avatar_2x.png" class="profile-img-card" />
+      <lottie-player src="https://assets5.lottiefiles.com/packages/lf20_nc1bp7st.json" background="transparent" speed="1"
+        style="width: 100%; height: 100%;" loop autoplay></lottie-player>
+      <br>
       <form name="form" @submit.prevent="handleLogin">
         <div class="form-group">
-          <label for="email">Email</label>
-          <input v-model.trim="email"
+          <input v-model.trim="email" placeholder="Email"
             :class="{ invalid: ($v.email.$dirty && !$v.email.required) || ($v.email.$dirty && !$v.email.email) }"
             type="text" class="form-control" id="email" />
-          <small class="helper-text invalid" v-if="$v.email.$dirty && !$v.email.required">Поле Email не должно быть
+          <small class="text-danger" v-if="$v.email.$dirty && !$v.email.required">Поле Email не должно быть
             пустым</small>
-          <small class="helper-text invalid" v-else-if="$v.email.$dirty && !$v.email.email">Введите корретный
+          <small class="text-danger" v-else-if="$v.email.$dirty && !$v.email.email">Введите корретный
             Email</small>
         </div>
         <div class="form-group">
-          <label for="password">Пароль</label>
           <input v-model.trim="password" :class="{
             invalid:
               ($v.password.$dirty && !$v.password.required)
               || ($v.password.$dirty && !$v.password.minLength || !$v.password.maxLength)
-          }" type="password" class="form-control" id="password" />
-          <small class="helper-text invalid" v-if="$v.password.$dirty && !$v.password.required">
+          }" type="password" placeholder="Пароль" class="form-control" id="password" />
+          <small class="text-danger" v-if="$v.password.$dirty && !$v.password.required">
             Введите пароль
           </small>
-          <small class="helper-text invalid"
-            v-else-if="$v.password.$dirty && !$v.password.minLength || !$v.password.maxLength">
+          <small class="text-danger" v-else-if="$v.password.$dirty && !$v.password.minLength || !$v.password.maxLength">
             Пароль должен быть в пределах от {{ $v.password.$params.minLength.min }} до
             {{ $v.password.$params.maxLength.max }} символов. Сейчас он {{ password.length }}
           </small>
@@ -43,7 +42,9 @@
   </div>
 </template>
 
+
 <script>
+import "@lottiefiles/lottie-player";
 import { email, required, minLength, maxLength } from 'vuelidate/lib/validators'
 
 export default {
@@ -91,7 +92,9 @@ export default {
           error => {
             this.loading = false;
             this.message =
-              (error.response && error.response.data && error.response.data.message) ||
+              (error.response &&
+                error.response.data &&
+                error.response.data.message) ||
               error.message ||
               error.toString();
           }

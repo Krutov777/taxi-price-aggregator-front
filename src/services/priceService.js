@@ -49,6 +49,15 @@ class PriceService {
       alert(e.message);
     }
   }
+
+  async getHistoryPrices() {
+    try {
+      return api.get("/prices/history_user");
+      // return api.get("/prices/history_user", { params: { page: page } });
+    } catch (e) {
+      alert(e.message);
+    }
+  }
 }
 
 export default new PriceService();

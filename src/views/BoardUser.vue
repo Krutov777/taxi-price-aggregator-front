@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <header class="jumbotron">
-      <h3>{{content}}</h3>
+      <h3>{{ content }}</h3>
     </header>
   </div>
 </template>
@@ -28,7 +28,7 @@ export default {
           error.message ||
           error.toString();
 
-        if (error.response && error.response.status === 403) {
+        if (error.response && error.response.status === 401) {
           EventBus.dispatch("logout");
         }
       }

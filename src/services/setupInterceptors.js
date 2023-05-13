@@ -33,27 +33,13 @@ const setup = (store) => {
             );
             const rs = await axiosInstance.post("/auth/token");
 
-            const { accessToken } = rs.data;
+            const { accessToken, refreshToken } = rs.data;
 
             store.dispatch("auth/token", accessToken);
             TokenService.updateLocalAccessToken(accessToken);
+            TokenService.updateLocalRefreshToken(refreshToken);
 
             return axiosInstance(originalConfig);
-            // TokenService.updateLocalAccessToken(TokenService.getLocalRefreshToken());
-            // await axiosInstance.post(
-            //   "/auth/token"
-            //   )
-            //   .then(function (response) {
-            //     const { accessToken } = response.data;
-            //     store.dispatch('/auth/token', accessToken);
-            //     TokenService.updateLocalAccessToken(accessToken);
-            //     return axiosInstance(originalConfig);
-            //   })
-            //   .catch((e) => {
-            //     if (e !== 200) {
-            //     TokenService.removeUser();
-            //     }
-            // })
           } catch (_error) {
             return Promise.reject(_error);
           }
