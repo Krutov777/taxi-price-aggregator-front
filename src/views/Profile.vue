@@ -6,9 +6,24 @@
       </h3>
     </header>
     <p>
-      <strong>Email:</strong>
-      {{ currentUser.email }}
+      <strong>Тут данные о пользователе:</strong>
+      <!-- <strong>Email:</strong>
+      {{ currentUser.email }} -->
     </p>
+    <div class="btn-group" role="group">
+      <button id="btnGroupDrop1" type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown"
+        aria-haspopup="true" aria-expanded="false">
+        Фильтровать по дате
+      </button>
+      <!-- filterHistoryPricesByDate -->
+      <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+        <button class="dropdown-item" @click="fetchHistoryPricesByUser('day')">За последний день</button>
+        <button class="dropdown-item" @click="fetchHistoryPricesByUser('week')">За последнюю неделю</button>
+        <button class="dropdown-item" @click="fetchHistoryPricesByUser('month')">За последний месяц</button>
+        <button class="dropdown-item" @click="fetchHistoryPricesByUser(undefined)">По умолчанию</button>
+      </div>
+    </div>
+    <br><br>
     <div v-if="loading">
       <lottie-player src="https://assets7.lottiefiles.com/packages/lf20_mirwmzd6.json" background="transparent" speed="1"
         style="width: 300px; height: 300px;" loop autoplay></lottie-player>
@@ -62,27 +77,8 @@ export default {
       historyPrices: {},
       loading: false,
       chartDataItem: {
-        labels: [
-          // 'January',
-          // 'February',
-          // 'March',
-          // 'April',
-          // 'May',
-          // 'June',
-          // 'July'
-        ],
-        datasets: [
-          // {
-          //   label: 'Data One',
-          //   borderColor: 'rgb(65,105,225)', //royalblue
-          //   backgroundColor: 'rgba(65,105,225,0.5)',
-          //   fill: false,
-          //   data: [30, 29, 20, 30, 29, 80, 40],
-          //   pointStyle: 'circle',
-          //   pointRadius: 6,
-          //   tension: 0.1
-          // },
-        ],
+        labels: [],
+        datasets: [],
         fromAddress: null,
         toAddress: null
       },
@@ -92,7 +88,7 @@ export default {
         maintainAspectRatio: false,
         scales: {
           x: {
-            display: false
+            display: true
           }
         }
       },
@@ -104,32 +100,117 @@ export default {
     },
   },
   methods: {
-    async fetchHistoryPrices() {
+    filterDateTime(filterDateTime, historyPrices) {
+      if (filterDateTime !== undefined) {
+        let startDate = new Date();
+        let endDate = new Date();
+        if (filterDateTime === "day")
+          startDate.setDate(endDate.getDate() - 1);
+        else if (filterDateTime === "week")
+          startDate.setDate(endDate.getDate() - 7);
+        else if (filterDateTime === "month")
+          startDate.setMonth(endDate.getMonth() - 1);
+        historyPrices = historyPrices.filter(function (a) {
+          var hitDates = a.dateTimeNumber;
+          var date = new Date(hitDates);
+          if (date >= startDate && date <= endDate)
+            return date
+        });
+      }
+      return historyPrices
+    },
+    groupPriceByDateTime(historyPrices) {
+      const pricesGroupedByDateTime = historyPrices.reduce((group, price) => {
+        const { dateTimeNumber } = price;
+        group[dateTimeNumber] = group[dateTimeNumber] ?? [];
+        group[dateTimeNumber].push(price);
+        return group;
+      }, {});
+      return pricesGroupedByDateTime
+    },
+    sortHistoryPriceByDateTime(historyPrices) {
+      return Object.keys(historyPrices).sort().reduce(
+        (obj, key) => {
+          obj[key] = historyPrices[key];
+          return obj;
+        },
+        {}
+      );
+    },
+    // для того чтобы выбрать элементы с delta 5 мин например
+    filterHistoryPricesByDelta(sortedPrices, delta) {
+      return Object.keys(sortedPrices)
+        .filter(function (dateTime, i, arrayDateTime) {
+          if (arrayDateTime.length - 2 >= i) {
+            if (new Date(parseInt(arrayDateTime[i + 1])) - new Date(parseInt(dateTime)) > delta) {
+              return dateTime
+            }
+          } else
+            return dateTime
+        })
+        .reduce((obj, key) => {
+          return Object.assign(obj, {
+            [key]: sortedPrices[key]
+          });
+        }, {});
+    },
+    async fetchHistoryPricesByUser(filterDateTime) {
       try {
         this.loading = true;
-        const response = await PriceService.getHistoryPrices(1);
+        const response = await PriceService.getHistoryPricesByUser();
         this.historyPrices = JSON.parse(JSON.stringify(response.data)).historyPrices;
+        this.chartData = [];
         for (const historyItem of this.historyPrices) {
-          this.chartDataItem.datasets = [];
+          this.chartDataItem = {
+            labels: [],
+            datasets: [],
+            fromAddress: null,
+            toAddress: null
+          }
           this.chartDataItem.fromAddress = historyItem.fromAddress;
           this.chartDataItem.toAddress = historyItem.toAddress;
-          const pricesGroupedByDateTime = historyItem.prices.reduce((group, price) => {
-            const { dateTimeNumber } = price;
-            group[dateTimeNumber] = group[dateTimeNumber] ?? [];
-            group[dateTimeNumber].push(price);
-            return group;
-          }, {});
-          const sortedPrices = Object.keys(pricesGroupedByDateTime).sort().reduce(
-            (obj, key) => {
-              obj[key] = pricesGroupedByDateTime[key];
-              return obj;
-            },
-            {}
-          );
-          const listDateTime = Object.keys(sortedPrices).slice(-40);
-          this.chartDataItem.labels = listDateTime.map(dateTimeNumber => new Date(parseInt(dateTimeNumber)).toLocaleString());
+
+          historyItem.prices = this.filterDateTime(filterDateTime, historyItem.prices);
+
+          const pricesGroupedByDateTime = this.groupPriceByDateTime(historyItem.prices);
+          // const pricesGroupedByDateTime = historyItem.prices.reduce((group, price) => {
+          //   const { dateTimeNumber } = price;
+          //   group[dateTimeNumber] = group[dateTimeNumber] ?? [];
+          //   group[dateTimeNumber].push(price);
+          //   return group;
+          // }, {});
+          // let sortedPrices = Object.keys(pricesGroupedByDateTime).sort().reduce(
+          //   (obj, key) => {
+          //     obj[key] = pricesGroupedByDateTime[key];
+          //     return obj;
+          //   },
+          //   {}
+          // );
+          let sortedPrices = this.sortHistoryPriceByDateTime(pricesGroupedByDateTime);
+
+          sortedPrices = this.filterHistoryPricesByDelta(sortedPrices, 300000);
+          // sortedPrices = Object.keys(sortedPrices)
+          //   .filter(function (dateTime, i, arrayDateTime) {
+          //     if (arrayDateTime.length - 2 >= i) {
+          //       if (new Date(parseInt(arrayDateTime[i + 1])) - new Date(parseInt(dateTime)) > 300000) {
+          //         return dateTime
+          //       }
+          //     } else
+          //       return dateTime
+          //   })
+          //   .reduce((obj, key) => {
+          //     return Object.assign(obj, {
+          //       [key]: sortedPrices[key]
+          //     });
+          //   }, {});
+          const listDateTime = Object.keys(sortedPrices).slice(-60).map(dateTimeNumber => new Date(parseInt(dateTimeNumber)).toLocaleDateString('ru-RU', { day: "numeric", month: "numeric", hour: "numeric", minute: "numeric" }));
+          this.chartDataItem.labels = listDateTime;
+
+          // const listDateTime = Object.keys(sortedPrices).slice(-50);
+          // this.chartDataItem.labels = listDateTime.map(dateTimeNumber => new Date(parseInt(dateTimeNumber)).toLocaleString());
           let listPriceObjects = Array.from(Object.values(sortedPrices));
           const uniqueNamesTaxi = [...new Set([].concat.apply([], listPriceObjects).map(obj => obj.nameTaxi))];
+
           for (let i = 0; i < uniqueNamesTaxi.length; i++) {
             let points = listPriceObjects.map(priceObjects => priceObjects.filter(priceObject => priceObject.nameTaxi === uniqueNamesTaxi[i]));
             points = points.map(function (priceObjects) {
@@ -148,30 +229,14 @@ export default {
                 fill: false,
                 pointStyle: 'circle',
                 pointRadius: 4,
-                data: points.slice(-40),
+                // data: points,
+                data: points.slice(this.chartDataItem.labels.length * -1),
                 tension: 0.3
               }
             )
           }
           this.chartData.push(this.chartDataItem)
         }
-        // uniqueNamesTaxi.forEach(nameTaxi => {
-        //   let points = listPriceObjects.map(priceObjects => priceObjects.filter(priceObject => priceObject.nameTaxi === nameTaxi));
-        //   points = points.map(priceObjects => priceObjects[0].price);
-        //   // console.log(points)
-        // this.chartData.datasets.push(
-        //   {
-        //     label: nameTaxi,
-        //     // borderColor: 'rgb(65,105,225)', //royalblue
-        //     // backgroundColor: 'rgba(65,105,225,0.5)',
-        //     fill: false,
-        //     pointStyle: 'circle',
-        //     pointRadius: 6,
-        //     data: points.slice(-10)
-        //     // return [...new Set(priceList.map(obj => obj.nameTaxi))]
-        //   }
-        // )
-        // })
         this.loading = false;
       } catch (e) {
         if (e.response && e.response.status === 401) {
@@ -220,7 +285,7 @@ export default {
     if (!this.currentUser) {
       this.$router.push("/login");
     }
-    this.fetchHistoryPrices()
+    this.fetchHistoryPricesByUser()
   },
 };
 </script>

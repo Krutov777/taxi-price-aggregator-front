@@ -50,10 +50,52 @@ class PriceService {
     }
   }
 
-  async getHistoryPrices() {
+  async getHistoryPricesByUser() {
     try {
       return api.get("/prices/history_user");
       // return api.get("/prices/history_user", { params: { page: page } });
+    } catch (e) {
+      alert(e.message);
+    }
+  }
+
+  async getHistoryPrices(
+    addressFromLon,
+    addressFromLat,
+    addressToLon,
+    addressToLat
+  ) {
+    try {
+      return api.get("/prices/history", {
+        params: {
+          longitudeFrom: addressFromLon,
+          latitudeFrom: addressFromLat,
+          longitudeTo: addressToLon,
+          latitudeTo: addressToLat,
+        },
+      });
+    } catch (e) {
+      alert(e.message);
+    }
+  }
+
+  async orderHistoryPrices(
+    addressFrom,
+    addressTo,
+    addressFromLon,
+    addressFromLat,
+    addressToLon,
+    addressToLat
+  ) {
+    try {
+      return api.post("/prices/history", {
+        fromAddress: addressFrom,
+        toAddress: addressTo,
+        longitudeFrom: addressFromLon,
+        latitudeFrom: addressFromLat,
+        longitudeTo: addressToLon,
+        latitudeTo: addressToLat,
+      });
     } catch (e) {
       alert(e.message);
     }
