@@ -1,15 +1,25 @@
 <template>
-  <div id="home">
+  <div>
     <h1>Цены на такси по маршруту </h1>
-    <div class="input-group mb-3">
-      <dadata-suggestions style="width: 100%;" v-model="addressFrom" :fullInfo.sync="addressfullFrom" field-value="value"
-        placeholder="Адрес отправления" @input="initAddressFrom" type="ADDRESS" />
+    <div class="row">
+      <div class="col-sm-15">
+        <img src="../assets/outline_person_pin_circle_black_24dp.png">
+      </div>
+      <div class="input-group mb-3 col-sm">
+        <dadata-suggestions style="width: 100%;" v-model="addressFrom" :fullInfo.sync="addressfullFrom"
+          field-value="value" placeholder="Адрес отправления" @input="initAddressFrom" type="ADDRESS" />
+      </div>
     </div>
-    <div class="input-group mb-3">
-      <dadata-suggestions style="width: 100%;" v-model="addressTo" :fullInfo.sync="addressfullTo" field-value="value"
-        placeholder="Адрес прибытия" @input="initAddressTo" type="ADDRESS" @click="initAddressTo" />
+    <div class="row">
+      <div class="col-sm-15">
+        <img src="../assets/outline_fmd_good_black_24dp.png">
+      </div>
+      <div class="input-group mb-3 col-sm">
+        <dadata-suggestions style="width: 100%;" v-model="addressTo" :fullInfo.sync="addressfullTo" field-value="value"
+          placeholder="Адрес прибытия" @input="initAddressTo" type="ADDRESS" @click="initAddressTo" />
+      </div>
     </div>
-
+    <br>
 
     <div class="form-group row">
       <div class="form-group mr-5 col-md-3">
@@ -18,7 +28,9 @@
         </button>
       </div>
       <div class="form-group mr-5 col-md-3">
-        <button class="btn btn-success btn-lg btn-block" @click="addOrderHistoryPrice">
+        <button class="btn btn-success btn-lg btn-block" data-toggle="tooltip" data-placement="top"
+          title="Заказывать историю цен может только авторизованный пользователь 1 раз в сутки."
+          @click="addOrderHistoryPrice">
           <span>Заказать историю цен</span>
         </button>
       </div>
@@ -28,16 +40,59 @@
         style="width: 300px; height: 300px;" loop autoplay></lottie-player>
     </div>
     <ul v-else>
-      <li v-for="(taxiPrice, index) in prices.taxiPrices" v-bind:key="index">
-        {{ taxiPrice.price }}
-        <br>
-        {{ taxiPrice.nameTaxi }}
-      </li>
+      <div class="row">
+        <div v-for="(taxiPrice, index) in   prices.taxiPrices  " v-bind:key="index">
+          <div class="col-sm-15 mr-5">
+            <div class="card" style="width: 18rem; height: 13rem;">
+              <div class="card-header">
+                <div class="form-row">
+                  <img v-if="taxiPrice.nameTaxi === 'Яндекс'" class="mr-3"
+                    src="https://upload.wikimedia.org/wikipedia/commons/2/20/Logo_yandex_taxi_app.png" width="50x"
+                    height="50px" alt="Card image cap">
+                  <img v-else-if="taxiPrice.nameTaxi === 'Uber'" class="mr-3"
+                    src="https://helios-i.mashable.com/imagery/articles/03y6VwlrZqnsuvnwR8CtGAL/hero-image.fill.size_1248x702.v1623372852.jpg"
+                    width="50x" height="50px" alt="Card image cap">
+                  <img v-else-if="taxiPrice.nameTaxi === 'Максим'" class="mr-3"
+                    src="https://play-lh.googleusercontent.com/bRDRVxur-TaSGjNFs_UNbtE4lsmmXFNTPFHwYCifSkit-TDcpMK24iMUixN3zJ_Phdbl"
+                    width="50x" height="50px" alt="Card image cap">
+                  <img v-else class="mr-3"
+                    src="https://sun9-56.userapi.com/impf/c604626/v604626359/1b56/hxAAyPi92Mc.jpg?size=800x800&quality=96&sign=85be3b0e6e2daedd7576a2d650fe2f45&c_uniq_tag=70sG1NEr_1ZIvG1r156n6l1mVjuRx9t3iJ_3_FodYiI&type=album"
+                    width="50x" height="50px" alt="Card image cap">
+                  <h3>{{ taxiPrice.nameTaxi }}</h3>
+                </div>
+              </div>
+              <div class="card-body">
+                <h5 class="card-title">Стоимость: {{ taxiPrice.price }} {{ taxiPrice.currency }}</h5>
+                <a class="btn btn-primary" v-if="taxiPrice.nameTaxi === 'Яндекс'"
+                  @click="createUrlYandexCall(addressfullFromFinish.data.geo_lon, addressfullFromFinish.data.geo_lat, addressfullToFinish.data.geo_lon, addressfullToFinish.data.geo_lat)"
+                  v-bind:href="linkYandex">
+                  <span>Заказать такси</span>
+                </a>
+                <a class="btn btn-primary" v-else-if="taxiPrice.nameTaxi === 'Uber'"
+                  href="https://www.uber.com/global/ru/sign-in/">
+                  <span>Заказать такси</span>
+                </a>
+                <a class="btn btn-primary" v-else-if="taxiPrice.nameTaxi === 'Максим'" href="https://taximaxim.ru/">
+                  <span>Заказать такси</span>
+                </a>
+              </div>
+            </div>
+          </div>
+          <br>
+          <!-- <a class="btn btn-primary btn-lg" v-if="taxiPrice.nameTaxi === 'Яндекс'"
+          @click="createUrlYandexCall(addressfullFromFinish.data.geo_lon, addressfullFromFinish.data.geo_lat, addressfullToFinish.data.geo_lon, addressfullToFinish.data.geo_lat)"
+          v-bind:href="linkYandex">
+          <span>Вызвать такси</span>
+        </a> -->
+        </div>
+
+      </div>
       <div v-if="addressFrom !== null && addressTo !== null">
         <ListHistoryPrice :longitudeFrom="addressfullFromFinish.data.geo_lon"
           :latitudeFrom="addressfullFromFinish.data.geo_lat" :longitudeTo="addressfullToFinish.data.geo_lon"
-          :latitudeTo="addressfullToFinish.data.geo_lat" />
+          :latitudeTo="addressfullToFinish.data.geo_lat" :typeHistoryPrice="'home'" />
       </div>
+
     </ul>
     <div class="form-group">
       <div v-if="message" class="alert alert-danger" role="alert">{{ message }}</div>
@@ -60,6 +115,7 @@ export default {
   },
   data() {
     return {
+      linkYandex: "",
       addressFrom: null,
       addressfullFrom: {
         data: {
@@ -85,6 +141,9 @@ export default {
     };
   },
   methods: {
+    createUrlYandexCall(geoLonFrom, geoLatFrom, geoLonTo, geoLatTo) {
+      this.linkYandex = `https://3.redirect.appmetrica.yandex.com/route?start-lat=${geoLatFrom}&start-lon=${geoLonFrom}&end-lat=${geoLatTo}&end-lon=${geoLonTo}&level=50&ref=yoursiteru&appmetrica_tracking_id=1178268795219780156`;
+    },
     initAddressFrom() {
       if (this.addressfullFrom !== null) {
         this.addressfullFromFinish = this.addressfullFrom
