@@ -31,8 +31,13 @@
         <div class="form-group">
           <button class="btn btn-primary btn-block" :disabled="loading" type="submit">
             <span v-show="loading" class="spinner-border spinner-border-sm"></span>
-            <span>Login</span>
+            <span>Авторизироваться</span>
           </button>
+          <br>
+          <a href="/reset_password" class="btn btn-primary btn-block" :disabled="loading">
+            <span v-show="loading" class="spinner-border spinner-border-sm"></span>
+            <span>Сбросить пароль</span>
+          </a>
         </div>
         <div class="form-group">
           <div v-if="message" class="alert alert-danger" role="alert">{{ message }}</div>

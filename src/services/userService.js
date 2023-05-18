@@ -1,20 +1,20 @@
-import api from './api';
+import api from "./api";
 
 class UserService {
-  getPublicContent() {
-    return api.get('/test/all');
+  async getUserInfo() {
+    try {
+      return api.get("/user");
+    } catch (e) {
+      alert(e.message);
+    }
   }
 
-  getUserBoard() {
-    return api.get('/test/user');
-  }
-
-  getModeratorBoard() {
-    return api.get('/test/mod');
-  }
-
-  getAdminBoard() {
-    return api.get('/test/admin');
+  async resetPassword(email) {
+    try {
+      return api.post(`/user/reset_password?email=${email}`);
+    } catch (e) {
+      alert(e.message);
+    }
   }
 }
 

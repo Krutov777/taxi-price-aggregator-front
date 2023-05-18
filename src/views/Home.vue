@@ -95,6 +95,9 @@
 
     </ul>
     <div class="form-group">
+      <div v-if="successfullMessage" class="alert alert-primary" role="alert">{{ successfullMessage }}</div>
+    </div>
+    <div class="form-group">
       <div v-if="message" class="alert alert-danger" role="alert">{{ message }}</div>
     </div>
 
@@ -137,7 +140,8 @@ export default {
       prices: {
         taxiPrices: []
       },
-      loadingPrices: false
+      loadingPrices: false,
+      successfullMessage: '',
     };
   },
   methods: {
@@ -163,8 +167,13 @@ export default {
       else
         return false
     },
+    clearMessages() {
+      this.message = '',
+        this.successfullMessage = ''
+    },
     async fetchPrices() {
       try {
+        this.clearMessages();
         this.loadingPrices = true;
         if (this.isNotNullAddress()) {
           const response = await PriceService.getPrices(
@@ -186,12 +195,12 @@ export default {
         else if (e.response && e.response.status === 429) {
           this.message = "Превышен лимит запросов!"
         }
-        // alert(e.message);
       }
     },
 
     async addOrderHistoryPrice() {
       try {
+        this.clearMessages();
         if (this.isNotNullAddress()) {
           const response = await PriceService.orderHistoryPrices(
             this.addressFrom,
@@ -202,17 +211,16 @@ export default {
             this.addressfullToFinish.data.geo_lat
           )
           this.successResponse = JSON.parse(JSON.stringify(response.data));
-          alert("Успешно заказана история цен!")
+          this.successfullMessage = "Успешно заказана история цен!"
         }
       } catch (e) {
         if (e.response && e.response.status === 401) {
-          alert("Для заказа истории цен необходимо авторизироваться!")
+          this.message = "Для заказа истории цен необходимо авторизироваться!"
         }
         else if (e.response && e.response.status === 429) {
           this.message = "На сегодня превышен лимит заказа историй цен!\nЛимит = 1 заказ в сутки."
           // alert("На сегодня превышен лимит заказа историй цен!\nЛимит = 1 заказ в сутки.")
         }
-        // alert(e.message);
       }
     }
   }

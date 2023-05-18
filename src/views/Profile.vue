@@ -1,15 +1,20 @@
 <template>
   <div class="container">
-    <header class="jumbotron">
-      <h3>
-        <strong>{{ currentUser.username }}</strong> Profile
-      </h3>
+    <header class="profileInfo">
+      <div class="card" style="width: 32rem;">
+        <div class="card-body">
+          <h4 class="card-title">Профиль</h4>
+        </div>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item"><strong>Логин:</strong> {{ userInfo.login }}</li>
+          <li class="list-group-item"><strong>Email:</strong> {{ userInfo.email }}</li>
+          <li class="list-group-item"><strong>Имя:</strong> {{ userInfo.firstName }}</li>
+          <li class="list-group-item"><strong>Фамилия:</strong> {{ userInfo.lastName }}</li>
+        </ul>
+      </div>
     </header>
-    <p>
-      <strong>Тут данные о пользователе:</strong>
-      <!-- <strong>Email:</strong>
-      {{ currentUser.email }} -->
-    </p>
+
+
     <div v-if="loading">
       <lottie-player src="https://assets7.lottiefiles.com/packages/lf20_mirwmzd6.json" background="transparent" speed="1"
         style="width: 300px; height: 300px;" loop autoplay></lottie-player>
@@ -29,6 +34,7 @@ import EventBus from "../common/EventBus";
 import PriceService from "../services/priceService";
 import ListHistoryPrice from "@/components/ListHistoryPrice";
 import "@lottiefiles/lottie-player";
+import UserService from "../services/userService";
 
 export default {
   name: "Profile",
@@ -40,6 +46,7 @@ export default {
       prices: {
         taxiPrices: []
       },
+      userInfo: null,
       loadingPrices: false,
       message: '',
     }
@@ -64,7 +71,19 @@ export default {
         else if (e.response && e.response.status === 429) {
           this.message = "Превышен лимит запросов!"
         }
-        // alert(e.message);
+      }
+    },
+    async fetchUserInfo() {
+      try {
+        const response = await UserService.getUserInfo();
+        this.userInfo = JSON.parse(JSON.stringify(response.data));
+      } catch (e) {
+        if (e.response && e.response.status === 401) {
+          EventBus.dispatch("logout");
+        }
+        else if (e.response && e.response.status === 429) {
+          this.message = "Превышен лимит запросов!"
+        }
       }
     }
   },
@@ -73,10 +92,12 @@ export default {
       this.$router.push("/login");
     }
     this.fetchHistoryPricesByUser();
-    let Script = document.createElement("script");
-    Script.setAttribute("src", "//yastatic.net/taxi-widget/ya-taxi-widget.js");
-    Script.setAttribute("charset", "UTF-8");
-    document.head.appendChild(Script);
+    this.fetchUserInfo();
   },
 };
 </script>
+<style>
+.profileInfo {
+  padding-top: 3%;
+}
+</style>

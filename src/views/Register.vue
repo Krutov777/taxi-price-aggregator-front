@@ -99,8 +99,13 @@
           <div class="form-group">
             <button class="btn btn-primary btn-block" :disabled="loading">
               <span v-show="loading" class="spinner-border spinner-border-sm"></span>
-              <span>Sign Up</span>
+              <span>Зарегистрироваться</span>
             </button>
+            <br>
+            <a href="/reset_password" class="btn btn-primary btn-block" :disabled="loading">
+              <span v-show="loading" class="spinner-border spinner-border-sm"></span>
+              <span>Сбросить пароль</span>
+            </a>
           </div>
         </div>
       </form>
