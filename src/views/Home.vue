@@ -79,11 +79,6 @@
             </div>
           </div>
           <br>
-          <!-- <a class="btn btn-primary btn-lg" v-if="taxiPrice.nameTaxi === 'Яндекс'"
-          @click="createUrlYandexCall(addressfullFromFinish.data.geo_lon, addressfullFromFinish.data.geo_lat, addressfullToFinish.data.geo_lon, addressfullToFinish.data.geo_lat)"
-          v-bind:href="linkYandex">
-          <span>Вызвать такси</span>
-        </a> -->
         </div>
 
       </div>
@@ -214,12 +209,11 @@ export default {
           this.successfullMessage = "Успешно заказана история цен!"
         }
       } catch (e) {
-        if (e.response && e.response.status === 401) {
+        if (e.response && e.response.status === 401 || e.response.status === 403) {
           this.message = "Для заказа истории цен необходимо авторизироваться!"
         }
         else if (e.response && e.response.status === 429) {
           this.message = "На сегодня превышен лимит заказа историй цен!\nЛимит = 1 заказ в сутки."
-          // alert("На сегодня превышен лимит заказа историй цен!\nЛимит = 1 заказ в сутки.")
         }
       }
     }
