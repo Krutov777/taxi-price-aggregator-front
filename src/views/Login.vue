@@ -23,10 +23,6 @@
           <small class="text-danger" v-if="$v.password.$dirty && !$v.password.required">
             Введите пароль
           </small>
-          <small class="text-danger" v-else-if="$v.password.$dirty && !$v.password.minLength || !$v.password.maxLength">
-            Пароль должен быть в пределах от {{ $v.password.$params.minLength.min }} до
-            {{ $v.password.$params.maxLength.max }} символов. Сейчас он {{ password.length }}
-          </small>
         </div>
         <div class="form-group">
           <button class="btn btn-primary btn-block" :disabled="loading" type="submit">
@@ -34,8 +30,8 @@
             <span>Авторизироваться</span>
           </button>
           <br>
-          <a href="/reset_password" class="btn btn-primary btn-block" :disabled="loading">
-            <span v-show="loading" class="spinner-border spinner-border-sm"></span>
+          <a href="/reset_password" class="btn btn-primary btn-block">
+            <span class="spinner-border-sm"></span>
             <span>Сбросить пароль</span>
           </a>
         </div>
@@ -97,11 +93,8 @@ export default {
           error => {
             this.loading = false;
             this.message =
-              (error.response &&
-                error.response.data &&
-                error.response.data.message) ||
-              error.message ||
               error.toString();
+            this.message = "Неправильный email или пароль"
           }
         );
       }

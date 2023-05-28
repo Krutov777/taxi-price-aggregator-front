@@ -77,6 +77,10 @@ export default {
         else if (e.response && e.response.status === 401) {
           EventBus.dispatch("logout");
         }
+        else if (e.response && e.response.status === 404) {
+          this.message = "Пользователя с таким адресом электронной почты не существует!"
+          this.loading = false;
+        }
         else if (e.response && e.response.status === 429) {
           this.message = "Превышен лимит запросов!"
         }
